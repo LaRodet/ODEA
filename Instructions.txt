@@ -1,0 +1,226 @@
+---------------------------------------------------
+	INSTRUCTIONS FOR THE USE OF ODEA
+---------------------------------------------------
+
+ODEA (Orbital Dynamics in Complex Evolving Architectures) is a N-body integrator designed to integrates nearly Keplerian systems that may experience some hierarchy reorganization. It is based on the symplectic integrator SWIFT HJS (Beust 2003), which follows the modular organization of SWIFT (Levison and Duncan 1994). ODEA is described in Rodet et al. 2019.
+
+Installation:
+
+This assumes that gfortran is available on your machine. Otherwise, please replace gfortran by your Fortran compiler in the three Makefile.
+
+In the directory odea, compile the library: make libswift
+In the main directory, compile the main code: make odea
+In the tools directory, compile the surrogate tools: make gen_hjs and make extract_hjs
+
+You can find some examples of input files in the example folder. The different steps are written in Simulation.sh. You can then use ./Simulation.sh to run the simulation.
+
+ODEA can be seen as an add-on to the SWIFT or SWIFT HJS package. The original routines from SWIFT and SWIFT HJS have not been changed, except for the IO_NBITS parameter in IO.INC that has been set to 8 and the io_write_line and io_write_line_r routines that are now writing their outputs respectively in real*4 (instead of integer*2) and real*8 (instead of real*4).
+
+---
+ Input files
+---
+
+The core code odea.f takes as inputs the masses, coordinates in the barycentric frame and hierarchy of the massive bodies (plhjs.in), the coordinates and hierarchy of the test particles (tphjs.in), as well as a parameter file with the different characteristic times (initial, final, step, output, save) and the different options of the simulation (params.in). To initialize the simulation with orbital elements or to directly generate a disk, the routine gen_hjs.sh can be used (see examples folder). Some options are not yet implemented (collisions, tides...), so that the related parameters will be ignored.
+
+###
+The generation file 
+
+gen_hjs.sh
+
+/user/work/odea/tools/gen_hjs <<!
+j ! Units menu : 0 for solar masses and au, 1 for au and years
+j ! Coordinate menu : 0 for ecliptic, 1 for invariable plane
+j ! Planet radius menu : 0 for no radius, 1 to include a physical radius, 2 to include a multiple of the hill radius (ignored)
+If 2, then give that multiple (ignored)
+N  ! Number of massive bodies
+m1 ! Masses (and potentially radii, ignored) of the bodies in solar mass
+m2
+m3
+...
+b1 b2 b3 ... ! Role of the bodies in the first orbit (-1 is center, 1 is satellite, 0 is foreign)
+sma(AU) ecc inc(deg) Om(deg) om(deg) M(deg) ! Orbital elements for first orbit
+b1 b2 b3 ... ! Role of the bodies in the second orbit
+sma ecc inc Om om M
+... (If N bodies, then N-1 orbits are expected)
+plhjs.in ! Planet data file
+iseed ! Large and odd integer, for the random generation of particles in a disk
+Ntp ! Number of test particles
+b1 b2 b3 ... ! Role of the bodies regarding the disk (-1 center, 0 foreign)
+j ! Disk in ecliptic (0), centers (1), invariable (2), other (3) or orbit (<0) plane
+emin emax ! Interval of eccentricity for disk tp
+imax ! Maximum inclination for disk tp (deg)
+amin amax ! Interval of semi-major axis for disk tp (AU)
+p ! power index for the semi-major axis distribution of disk tp
+inc Om ! If disk in other plane, input inclination and Omega here (deg)
+0 ! No more particles
+tphjs.in ! Tp data file
+!
+exit
+
+###
+Massive bodies input file (automatically created by gen_hjs.sh)
+
+plhjs.in
+
+N ! Number of massive bodies
+m1 ! Mass of first body
+x1 y1 z1 ! Position of first body (in barycentric frame, AU)
+vx1 vy1 vz1 ! Velocity of first body (in barycentric frame, AU/yr)
+m2 ! Mass of second body
+x2 y2 z2
+vx2 vy2 vz2
+...
+b1_1 b2_1 b3_1 ... ! Role of the bodies in the first orbit
+b1_2 b2_2 b3_2 ... ! Role of the bodies in the second orbit
+...
+
+###
+Test particles input file (automatically created by gen_hjs.sh)
+
+tphjs.in
+
+Ntp ! Number of test particles
+x1 y1 z1 ! Position of first tp (relative to the center(s) of its orbit, AU)
+vx1 vy1 vz1 ! Velocity of first tp (relative to the center(s) of its orbit, AU/yr)
+b1 b2 b3 ... ! Role of the bodies regarding the first tp (-1 center, 0 foreign)
+s ! status of first tp (NSTAT array, first bit: 0 is active, 1 is not)
+r ! status of first tp (NSTATR array, filled with 0. if 
+x2 y2 z2 ! Position of second tp 
+vx2 vy2 vz2
+b1 b2 b3 ...
+s
+r
+...
+
+###
+The parameter file
+
+paramhjs.in
+
+t0 tstop dt ! Initial time, final time, time step
+dtout dtdump ! Time between binary outputs, time between saves
+T T F T F T T F! (from right to left) real*4 binary data file, real*8 binary file, calc energy of system wrth time, calc jacobi of the test particles (ignored), check if particles are removed, include J2 and J4, (ignored), initial hierarchy check, adaptive time step
+rmin  rmax rmaxu qmin F ! min distance from stars, max distance from centers, max distance from centers if not bound, smallest perihelion distance, discard particle getting too close to planets (ignored)
+/user/work ! Data directory 
+run ! Data subdirectory
+bin ! Name of binary output file
+new ! Statement of the output file
+
+---
+ Launch file
+---
+
+swift_hjs.sh
+
+gen_hjs.sh ! Gen file (optional)
+paramhjs.in ! Get data for the run
+plhjs.in ! Massive bodies data file
+tphjs.in ! Test particles data file
+10 ! Verbose frequency (in output time step)
+
+---
+ Output files
+---
+
+###
+Binary file
+
+bin
+
+t N Ntp ! Time, number of massive bodies and of left tp
+-2 sma(AU) e inc(rad) Om(rad) om(rad) M(rad) ! Orbital elements of first orbit  
+-3 sma(AU) e inc(rad) Om(rad) om(rad) M(rad) ! Orbital elements of second orbit  
+...
+ 1 sma(AU) e inc(rad) Om(rad) om(rad) M(rad) ! Orbital elements of first tp
+ 2 sma(AU) e inc(rad) Om(rad) om(rad) M(rad) ! Orbital elements of second tp
+...
+t N Ntp
+...
+
+### 
+Energy file
+
+energy.out
+
+t E Cx Cy Cz dt ! time, total energy, total angular momentum (in the barycentric ref), time step
+
+### 
+Hierarchy file
+
+oloc.out
+
+t b1_1 b1_2 ... b2_1 b2_2 ... Role of bodies in orbits (bj_k represents the role of body j in orbit k)
+
+### 
+Transformation from barycentric to Hierarchical Jacobi frame
+
+mat.dat
+
+eta ! Mass of the centers
+mu ! Mass of the satellites
+mat ! Transformation matrix from barycentric to hierarchical Jacobi
+umat ! Inverse transformation matrix
+
+
+###
+Transformation matrix from tp's plan to ecliptic
+
+matpass.dat
+
+1. 0. 0.
+0. 1. 0.
+0. 0. 1.
+
+
+###
+Extract file
+
+extract.sh
+
+/user/work/odea/tools/extract_hjs <<!
+paramhjs.in
+plhjs.in
+tphjs.in
+t0 tstop dtout ! Time intervals for test particle outputs
+!
+exit
+
+### 
+Orbital elements of massive bodies
+
+elbodies.dat
+
+N ! Number of massive bodies
+t 0 0 0 0 0 0 ! time
+k sma e inc Om om M # Orbital elements for bodies, angles in rad
+...
+
+### 
+Coordinates of massive bodies
+
+xvbodies.dat
+
+N ! Number of massive bodies
+t 0 0 0 0 0 0 ! Time
+k xb yb zb vxb vyb vzb # Positions and velocities in the barycentric frame
+...
+
+###
+Orbital elements of test particles
+
+eltp.dat
+
+N Ntp ! Number of massive bodies and initial number of test particles
+t Nleft 0 0 0 0 0 ! Time and number of remaining test particles
+k sma e inc Om om M ! Orbital elements for tp, angles in rad
+...
+
+### 
+Coordinates of test particles
+
+xvtp.dat
+
+N Ntp ! Number of massive bodies and initial number of test particles
+t Nleft 0 0 0 0 0 ! Time and number of remaining test particles
+k xb yb zb vxb vyb vzb ! Positions and velocities of tp in the barycentric frame
+...
