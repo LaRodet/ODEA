@@ -21,7 +21,7 @@ c    xj, yj, zj    ==>  initial position in Gen. Jacobi coord
 c    vxj, vyj, vzj ==>  initial position in Gen. Jacobi coord
 c    rplsq         ==>  min distance^2 that a tp can get from planet
 
-      subroutine io_init_pl_hjs(infile, lclose, nbod, oloc,
+      subroutine io_init_pl_hjs(infile, lclose, iflgchk, nbod, oloc,
      &     mass, eta, mu, mat, umat, xj, yj, zj, vxj, vyj, vzj, rplsq)
 
       include '../swift.inc'
@@ -30,6 +30,7 @@ c    rplsq         ==>  min distance^2 that a tp can get from planet
 c...  Input
       character*(*) infile
       logical*2 lclose
+      integer iflgchk
 
 c...  Output
       real*8 mass(NPLMAX), rplsq(NPLMAX)
@@ -49,7 +50,7 @@ c-----
 c...  Executable code
 
       write(*,*) 'Planet data file is ', infile
-      call io_open(7,infile,'old','formatted',ierr)
+      call io_open(7, infile, 'old', 'formatted', ierr)
 
 c...  Read number of planets
       read(7,*) nbod

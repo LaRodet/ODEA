@@ -39,8 +39,8 @@ c    eltp.dat      ==> Orbital elements tp
 
       integer iflgchk, iu, iread, ireadtp, i, j, k
       integer nbod, nleft, id, ntp
-      integer io_read_hdr_odea, io_read_line, ierr
-      integer io_read_line_r
+      integer io_read_hdr, io_read_hdr_r, ierr
+      integer io_read_line, io_read_line_r
       integer oloc(NPLMAX,NPLMAX), ialpha
       integer oloct(NPLMAX,NTPMAX)
       integer istat(NTPMAX,NSTAT), rstat(NTPMAX,NSTATR)
@@ -63,7 +63,7 @@ c    eltp.dat      ==> Orbital elements tp
 
       write(*,*) 'enter name of planet data file : '
       read(*,'(a)') inplfile
-      call io_init_pl_hjs(inplfile, lclose, nbod, oloc,
+      call io_init_pl_hjs(inplfile, lclose, iflgchk, nbod, oloc,
      &   mass, eta, mu, mat, umat, xj, yj, zj, vxj, vyj, vzj, rplsq)
 
       write(*,*) 'Enter name of test particle data file : '
@@ -133,7 +133,11 @@ c    eltp.dat      ==> Orbital elements tp
 
       do while (t.lt.tstop)
 
-         ierr = io_read_hdr_odea(iu, t, nbod, nleft)
+         if (btest(iflgchk,0))  then
+            ierr = io_read_hdr(iu, t, nbod, nleft)
+         else
+            ierr = io_read_hdr_r(iu, t, nbod, nleft)
+         endif
 
          if (ierr.ne.0) then
             print*,"Problem opening binary file"

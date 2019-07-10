@@ -89,7 +89,11 @@ c...  If first time through open file
          call io_open(iu, oname, 'append', 'UNFORMATTED', ierr)
       endif
 
-      call io_write_hdr_odea(iu, time, nbod, ntp, istat)
+      if (btest(iflgchk,0)) then
+         call io_write_hdr(iu, time, nbod, ntp, istat)
+      else
+         call io_write_hdr_r(iu, time, nbod, ntp, istat)
+      end if
 
       call coord_g2b(nbod, umat, mass, xj, yj, zj, vxj, vyj, vzj,
      &   xb, yb, zb, vxb, vyb, vzb)

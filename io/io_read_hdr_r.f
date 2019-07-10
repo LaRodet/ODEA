@@ -1,7 +1,7 @@
 c***********************************************************************
-c                            IO_READ_HDR_ODEA.F
+c                            IO_READ_HDR_R.F
 c***********************************************************************
-c Read in header part of the binary file
+c Read in header part of the real*8 binary file
 c
 c Input:
 c    iu            ==> unit number to write to
@@ -12,9 +12,9 @@ c    nbod          ==>  number of massive bodies (int scalar)
 c    nleft         ==>  number of active tp (int scalar)
 c
 c Returns:
-c    io_read_hdr   ==>   =0 read ok, fails otherwise
+c    io_read_hdr_r   ==>   =0 read ok, fails otherwise
 
-      integer function io_read_hdr_odea(iu, time, nbod, nleft)
+      integer function io_read_hdr_r(iu, time, nbod, nleft)
 
       include '../swift.inc'
       include 'io.inc'
@@ -34,11 +34,11 @@ c...  Executable code
 
 
       read(iu,iostat=ierr) time, nbod, nleft
-      io_read_hdr_odea = ierr
+      io_read_hdr_r = ierr
       if(ierr.ne.0) then
          return
       endif
 
       return
-      end     ! io_read_hdr_odea.f
+      end     ! io_read_hdr_r
 c-----------------------------------------------------------------------

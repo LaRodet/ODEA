@@ -21,9 +21,9 @@ c...  Executable code
       write(*,*) ' '
 
       if(iflg.eq.0) then
-         write(*,*) 'Normal termination of ODEA'
+         write(*,*) 'Normal termination'
       else
-         write(*,*) 'Terminating ODEA due to ERROR!'
+         write(*,*) 'Terminating due to ERROR!'
       endif
 
       write(*,*) '----------------------------------------------------'

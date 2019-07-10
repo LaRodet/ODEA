@@ -1,9 +1,9 @@
 c***********************************************************************
-c                            UTIL_VERSION.F
+c                            UTIL_VERSION_ODEA.F
 c***********************************************************************
 c Beginning the code
 
-      subroutine util_version
+      subroutine util_version_odea
 
 c-----
 c...  Executable code
@@ -12,6 +12,6 @@ c...  Executable code
 
       return
 
-      end  ! util_exit
+      end  ! util_version_odea
 
 c-----------------------------------------------------------------------

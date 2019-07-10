@@ -2,7 +2,7 @@
 	INSTRUCTIONS FOR THE USE OF ODEA
 ---------------------------------------------------
 
-ODEA (Orbital Dynamics in Complex Evolving Architectures) is a N-body integrator designed to integrates nearly Keplerian systems that may experience some hierarchy reorganization. It is based on the symplectic integrator SWIFT HJS (Beust 2003), which follows the modular organization of SWIFT (Levison and Duncan 1994). ODEA is described in Rodet et al. 2019.
+ODEA (Orbital Dynamics in Complex Evolving Architectures) is a N-body integrator designed to integrates nearly Keplerian systems that may experience some hierarchy reorganization. It is based on the symplectic integrator SWIFT HJS (Beust 2003, included in the directory), which follows the modular organization of SWIFT (Levison and Duncan 1994). ODEA is described in Rodet et al. 2019.
 
 Installation:
 
@@ -13,6 +13,9 @@ In the main directory, compile the main code: make odea
 In the tools directory, compile the surrogate tools: make gen_hjs and make extract_hjs
 
 You can find some examples of input files in the example folder. The different steps are written in Simulation.sh. You can then use ./Simulation.sh to run the simulation.
+Example 1: Capture of a binary companion by a passing star (ODEA)
+Example 2: Capture of a binary companion by a passing star, with some test particles (ODEA)
+Example 3: Solar System (SWIFT HJS)
 
 ODEA can be seen as an add-on to the SWIFT or SWIFT HJS package. The original routines from SWIFT and SWIFT HJS have not been changed, except for the IO_NBITS parameter in IO.INC that has been set to 8 and the io_write_line and io_write_line_r routines that are now writing their outputs respectively in real*4 (instead of integer*2) and real*8 (instead of real*4).
 

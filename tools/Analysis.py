@@ -160,33 +160,42 @@ for j in range(Norbits):
         plt.xlabel("Time (yr)")
         if k == 0:
             plt.plot(t, a[j], '.', color='C%s'%j)
-            plt.title(r"$a$ (au)")
+            if j == 0:
+                plt.title(r"$a$ (au)")
         if k == 1:
             plt.plot(t, e[j], '.', color='C%s'%j)
-            plt.title(r"$e$")
+            if j == 0:
+                plt.title(r"$e$")
         if k == 2:
             plt.plot(t, i[j], '.', color='C%s'%j)
-            plt.title(r"$i$ (deg)")
+            if j == 0:
+                plt.title(r"$i$ (deg)")
         if k == 3:
             plt.plot(t, O[j], '.', color='C%s'%j)
-            plt.title(r"$\Omega$ (deg)")
+            if j == 0:
+                plt.title(r"$\Omega$ (deg)")
         if k == 4:
             plt.plot(t, w[j], '.', color='C%s'%j)
-            plt.title(r"$\omega$ (deg)")
+            if j == 0:
+                plt.title(r"$\omega$ (deg)")
         if k == 5:
             plt.plot(t, M[j], '.', color='C%s'%j)
-            plt.title(r"$M$ (deg)")
+            if j == 0:
+                plt.title(r"$M$ (deg)")
 
 fig.subplots_adjust(left=0.05, right=0.98)
 plt.savefig("Evolution.png")
 plt.close(fig)
 
-olocfile = open("oloc.out","r")
+try:
+    olocfile = open("oloc.out","r")
 
-data = np.loadtxt(olocfile)
-tchange = SketchOloc(data, Nframe, nbod)
+    data = np.loadtxt(olocfile)
+    tchange = SketchOloc(data, Nframe, nbod)
 
-olocfile.close()
+    olocfile.close()
+except:
+    tchange = []
 
 ce = []
 try:
@@ -290,24 +299,30 @@ if len(tchange) > 0:
         for k in range(6):
             plt.subplot(Norbits, 6, j*6+k+1)
             plt.xlabel(r"Time (yr)")
-            if (k==0):
+            if k == 0:
                 plt.plot(t, a[j], '.', color='C%s'%j)
-                plt.title(r"$a$ (au)")
-            if (k==1):
+                if j == 0:
+                    plt.title(r"$a$ (au)")
+            if k == 1:
                 plt.plot(t, e[j], '.', color='C%s'%j)
-                plt.title(r"$e$")
-            if (k==2):
+                if j == 0:
+                    plt.title(r"$e$")
+            if k == 2:
                 plt.plot(t, i[j], '.', color='C%s'%j)
-                plt.title(r"$i$ (deg)")
-            if (k==3):
+                if j == 0:
+                    plt.title(r"$i$ (deg)")
+            if k == 3:
                 plt.plot(t, O[j], '.', color='C%s'%j)
-                plt.title(r"$\Omega$ (deg)")
-            if (k==4):
+                if j == 0:
+                    plt.title(r"$\Omega$ (deg)")
+            if k == 4:
                 plt.plot(t, w[j], '.', color='C%s'%j)
-                plt.title(r"$\omega$ (deg)")
-            if (k==5):
+                if j == 0:
+                    plt.title(r"$\omega$ (deg)")
+            if k == 5:
                 plt.plot(t, M[j], '.', color='C%s'%j)
-                plt.title(r"$M$ (deg)")
+                if j == 0:
+                    plt.title(r"$M$ (deg)")
             for n in range(len(tchange)):
                 plt.axvline(x=tchange[n], color='r')
             if not noce:
