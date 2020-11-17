@@ -117,7 +117,7 @@ for j in range(4):
 dirs = inparfile.readline().strip()
 gname = inparfile.readline().strip()
 diro = dirs+'/'+gname
-print diro
+print(diro)
 
 inparfile.close()
 
@@ -127,12 +127,12 @@ elbodies = open("elbodies.dat",'r')
 
 nbod = int(elbodies.readline().strip().split(" ")[0])
 Norbits = nbod-1
-print "Number of bodies:",nbod
+print(f"Number of bodies:{nbod}")
 data = np.loadtxt(elbodies,dtype='float')
 
 elbodies.close()
 
-Nframe = data.shape[0]/nbod
+Nframe = int(data.shape[0]/nbod)
 
 t = np.zeros(Nframe)
 a = np.zeros((Norbits,Nframe))
@@ -201,7 +201,7 @@ ce = []
 try:
     cefile = open("ce.out", "r")
 except:
-    print "No close encounter"
+    print("No close encounter")
     noce = True
 else:
     noce = False
@@ -223,16 +223,16 @@ else:
     tceend = [ ce[ce[:,0]==k+2][:,2] for k in range(Norbits)]
 
     for k in range(Norbits):
-        print len(tcebeg[k]),"close encounters for orbit",k
+        print(f"{len(tcebeg[k])} close encounters for orbit {k}")
 
-print len(tchange), "changes of hierarchy"
+print(f"{len(tchange)} changes of hierarchy")
 
 if len(tchange) > 0:
 
     plhjs = open("plhjs.in","r")
 
     if int(plhjs.readline().strip()) != nbod:
-        print "Problem with nbod"
+        print("Problem with nbod")
 
     mass = np.zeros(nbod)
     for j in range(nbod):
