@@ -12,7 +12,7 @@ def SketchOloc(data, Nframe, N):
 
     Nframe = len(t)
     l = len(oloc[0])
-    N = (1+int(np.sqrt(1+4*l)))/2
+    N = int((1+int(np.sqrt(1+4*l)))/2)
 
     tchange = []; nchange = [0]
     for n in range(1,Nframe):
@@ -32,7 +32,8 @@ def SketchOloc(data, Nframe, N):
         ### Reorganize
         olocmat = (np.reshape(oloc[nchange[nch]],(N,N-1))).astype('int')
 
-        order = range(1,N+1)
+        r = range(1, N+1)
+        order = [*r]
         for n in range(N-1):
             okaux = np.ones(N,dtype=bool)
             for j in range(N-1):
