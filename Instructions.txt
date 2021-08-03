@@ -227,3 +227,9 @@ N Ntp ! Number of massive bodies and initial number of test particles
 t Nleft 0 0 0 0 0 ! Time and number of remaining test particles
 k xb yb zb vxb vyb vzb ! Positions and velocities of tp in the barycentric frame
 ...
+
+---
+ Tidal Extension
+---
+
+
