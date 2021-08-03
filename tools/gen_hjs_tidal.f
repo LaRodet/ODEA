@@ -12,6 +12,8 @@ c This code generates the input file for ODEA from the input of the orbital elem
      &                       au = 1.495978707d8               ! km
 
       real*8   mass(nplmax), mtot, rpl(nplmax), rplsq(nplmax)
+      real*8   atidal(nplmax), qtidal(nplmax)
+      real*8   rtidal(nplmax), stidal(nplmax)
       real*8   mat(nplmax,nplmax), umat(nplmax,nplmax)
       real*8   eta(nplmax), mu(nplmax), vsat, vcen
       real*8   xb(nplmax), yb(nplmax), zb(nplmax)
@@ -49,7 +51,7 @@ c This code generates the input file for ODEA from the input of the orbital elem
 
       character*1    rep
       character*32   name
-      character*80   inplfile,intpfile
+      character*80   inplfile,intpfile,tidalfile
 
       ok=.false.
       do while(.not.ok)
@@ -87,8 +89,10 @@ c This code generates the input file for ODEA from the input of the orbital elem
       write(*,*)' give number of massive bodies in the system '
       read(*,*) nbod
       do i=1,nbod
-         write(*,*)' give mass of body #',i,' in solar masses '
-         read(*,*) mass(i)
+         write(*,*)" give mass of body #",i," in solar masses and ",
+     & "tidal parameters alpha, Q', radius (km) and spin (yr-1)"
+         read(*,*) mass(i), atidal(i), qtidal(i), rtidal(i), stidal(i)
+         rtidal(i) = rtidal(i)/au
       end do
       if (irflg.eq.1) then
          write(*,*)' give radius of body #',i,' in km'
@@ -136,14 +140,13 @@ c This code generates the input file for ODEA from the input of the orbital elem
       end do
 
 c...  Calc the radii
-      rplsq(1) = 0.0d0
       if(irflg.eq.0) then
          lclose = .false.
          rplsq(1:nbod) = 0.d0
       else if(irflg.eq.1) then
          lclose = .true.
          do i=1,nbod
-            rplsq(i) = (rpl(i-1)/au)**2
+            rplsq(i) = (rpl(i)/au)**2
          end do
       endif
 
@@ -191,6 +194,10 @@ c... Build inverse transform matrix jacobi --> barycentric
       call io_dump_pl_hjs(inplfile, nbod, oloc, mass(1:nbod), umat,
      &   xj(1:nbod), yj(1:nbod), zj(1:nbod), vxj(1:nbod), vyj(1:nbod),
      &   vzj(1:nbod), lclose, iflgchk, rplsq(1:nbod))
+      write(*,*) ' Name of tidal data file?'
+      read(*,'(a)') tidalfile
+      call io_dump_tidal(tidalfile, nbod, mass(1:nbod), atidal(1:nbod),
+     &   qtidal(1:nbod), rtidal(1:nbod), stidal(1:nbod))
 
       okc = .true.
       write(*,*) ' Input iseed (large and odd):'

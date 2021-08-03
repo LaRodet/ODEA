@@ -21,3 +21,8 @@ gen_hjs.o:	gen_hjs.f
 gen_hjs: gen_hjs.o
 	$(LINK) -o gen_hjs gen_hjs.o $(LIBSWIFT)
 	rm gen_hjs.o
+gen_hjs_tidal.o:	gen_hjs_tidal.f
+	$(FOR) gen_hjs_tidal.f
+gen_hjs_tidal: gen_hjs_tidal.o
+	$(LINK) -o gen_hjs_tidal gen_hjs_tidal.o $(LIBSWIFT)
+	rm gen_hjs_tidal.o

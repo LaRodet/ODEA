@@ -113,7 +113,7 @@ new ! Statement of the output file
  Launch file
 ---
 
-swift_hjs.sh
+odea.sh or swift_hjs.sh
 
 gen_hjs.sh ! Gen file (optional)
 paramhjs.in ! Get data for the run
@@ -231,5 +231,5 @@ k xb yb zb vxb vyb vzb ! Positions and velocities of tp in the barycentric frame
 ---
  Tidal Extension
 ---
-
+Each time the mass is asked, so is asked the dimensionless moment of inertia alpha, the modified tidal factor, the radius and the spin.
 
