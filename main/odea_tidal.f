@@ -11,6 +11,7 @@ c  To run, need 3 input files. The code prompts for the file names,
 c  but examples are :
 c     parameter file ==> param.in
 c     planet file ==> pl.in
+c     tidal file ==> tidal.in
 c     test particle file ==> tp.in
 
       include '../swift.inc'
@@ -20,7 +21,8 @@ c     test particle file ==> tp.in
       real*8 xjt(NTPMAX), yjt(NTPMAX), zjt(NTPMAX)
       real*8 vxjt(NTPMAX), vyjt(NTPMAX), vzjt(NTPMAX)
 
-      real*8 mass(NPLMAX)
+      real*8 mass(NPLMAX), atidal(NPLMAX), qtidal(NPLMAX)
+      real*8 rtidal(NPLMAX), stidal(NPLMAX)
       real*8 xj(NPLMAX), yj(NPLMAX), zj(NPLMAX)
       real*8 vxj(NPLMAX), vyj(NPLMAX), vzj(NPLMAX)
 
@@ -28,7 +30,7 @@ c     test particle file ==> tp.in
       real*8 rstat(NTPMAX,NSTATR),rstati(NSTATR)
       integer oloc(NPLMAX,NPLMAX), oloct(NPLMAX,NTPMAX)
       integer nbod, ntp, nleft
-      integer iflgchk, iuf, iud, iue, iuo, iuotp, i, j, ierr
+      integer iflgchk, iuf, iud, iue, iuo, ius, iuotp, i, j, ierr
       real*8 umat(NPLMAX,NPLMAX), mat(NPLMAX,NPLMAX)
       real*8 umatp(NPLMAX,NTPMAX), matp(NPLMAX,NTPMAX)
       real*8 mu(NPLMAX), eta(NPLMAX), etatp(NTPMAX)
@@ -42,7 +44,7 @@ c     test particle file ==> tp.in
       logical*2 lclose
 
       character*80 outfile, inparfile, inplfile, intpfile, fopenstat
-      character*80 diro, dirs, gname, dataname, genfile
+      character*80 diro, dirs, gname, dataname, genfile, tidalfile
 
       integer ialpha, nsta, fverb, iverb
       real*8 a, e, inc, capom, omega, capm
@@ -75,6 +77,13 @@ c...  Prompt and read name of massive bodies data file
       read(*,999) inplfile
       call io_init_pl_hjs(inplfile, lclose, iflgchk, nbod, oloc,
      &   mass, eta, mu, mat, umat, xj, yj, zj, vxj, vyj, vzj, rplsq)
+
+c...  Prompt and read name of tidal data file
+      write(*,*) ' '
+      write(*,*) 'Enter name of massive bodies data file: '
+      read(*,999) tidalfile
+      call io_init_tidal(tidalfile, mass, atidal, qtidal, rtidal,
+     & stidal)
 
 c...  Get data for the run and the test particles
       write(*,*) 'Enter name of test particle data file: '
@@ -131,6 +140,7 @@ c...  Initialize initial time and times for first output and first dump
       iue = 60
       iuo = 80
       iuotp = 100
+      ius = 120
 
 c...   Do the initial io write
       if(btest(iflgchk,0).or.btest(iflgchk,1))  then ! bit 0 or 1 is set
@@ -173,6 +183,12 @@ c...  Initialize discard io routine
      &      matp, umatp, mass, eta, mu, etatp, xj, yj, zj, vxj, vyj,
      &      vzj, xjt, yjt, zjt, vxjt, vyjt, vzjt, istat, rstat, dt,
      &      iflgchk)
+
+         if (any(qtidal(1:nbod).gt.0.d0)) then
+            call tidal_dissipation(nbod, oloc, mass, eta, mu,
+     &        xj, yj, zj, vxj, vyj, vzj, atidal, qtidal, rtidal, stidal,
+     &        dt)
+         end if
 
          t = t + nsta*dt
 c------------
@@ -241,6 +257,7 @@ c               print*,'t',t,'DE/E=',(energy-energy0)/energy
 
             call io_oloc_write(t, nbod, ntp, oloc, oloct, iuo, iuotp,
      &           diro, fopenstat)
+            call io_spin_write(t, nbod, stidal, ius, diro, fopenstat)
 
             tout = tout + dtout
          endif
@@ -253,6 +270,8 @@ c...     If it is time, do a dump
             call io_dump_pl_hjs(trim(diro)//'/'//'dump_pl.dat',
      &           nbod, oloc, mass, umat,
      &           xj, yj, zj, vxj, vyj, vzj, lclose, iflgchk, rplsq)
+            call io_dump_tidal(trim(diro)//'/'//'dump_tidal.dat',
+     &           nbod, mass, atidal, qtidal, rtidal, stidal)
             call io_dump_tp_hjs(trim(diro)//'/'//'dump_tp.dat', nbod,
      &         ntp, matp, xjt, yjt, zjt, vxjt, vyjt, vzjt, istat, rstat)
             call io_dump_param(trim(diro)//'/'//'dump_param.dat',
@@ -270,6 +289,8 @@ c...  Do a final dump for possible resumption later
       call io_dump_pl_hjs(trim(diro)//'/'//'dump_pl.dat',
      &     nbod, oloc, mass, umat,
      &     xj, yj, zj, vxj, vyj, vzj, lclose, iflgchk, rplsq)
+      call io_dump_tidal(trim(diro)//'/'//'dump_tidal.dat',
+     &      nbod, mass, atidal, qtidal, rtidal, stidal)
       call io_dump_tp_hjs(trim(diro)//'/'//'dump_tp.dat',
      &     nbod, ntp, matp,
      &     xjt, yjt, zjt, vxjt, vyjt, vzjt, istat, rstat)

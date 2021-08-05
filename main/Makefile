@@ -23,3 +23,8 @@ swift_hjs.o: swift_hjs.f
 swift_hjs: swift_hjs.o
 	$(LINK) -fmax-stack-var-size=262144 -o swift_hjs swift_hjs.o  $(LIBSWIFT)
 	rm swift_hjs.o
+odea_tidal.o: odea_tidal.f
+	$(FOR) odea_tidal.f
+odea_tidal: odea_tidal.o
+	$(LINK) -fmax-stack-var-size=262144 -o odea_tidal odea_tidal.o  $(LIBSWIFT)
+	rm odea_tidal.o

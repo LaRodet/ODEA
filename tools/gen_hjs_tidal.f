@@ -9,11 +9,12 @@ c This code generates the input file for ODEA from the input of the orbital elem
 
       real*8, parameter :: smassyr = twopi*twopi,
      &                       dr = 1.7453292519943294d-2,      ! pi/180
-     &                       au = 1.495978707d8               ! km
+     &                       au = 1.495978707d8  ,             ! km
+     &                       yr = 365.25d0                       ! day
 
       real*8   mass(nplmax), mtot, rpl(nplmax), rplsq(nplmax)
       real*8   atidal(nplmax), qtidal(nplmax)
-      real*8   rtidal(nplmax), stidal(nplmax)
+      real*8   rtidal(nplmax), stidal(nplmax), spinperiod
       real*8   mat(nplmax,nplmax), umat(nplmax,nplmax)
       real*8   eta(nplmax), mu(nplmax), vsat, vcen
       real*8   xb(nplmax), yb(nplmax), zb(nplmax)
@@ -90,9 +91,14 @@ c This code generates the input file for ODEA from the input of the orbital elem
       read(*,*) nbod
       do i=1,nbod
          write(*,*)" give mass of body #",i," in solar masses and ",
-     & "tidal parameters alpha, Q', radius (km) and spin (yr-1)"
-         read(*,*) mass(i), atidal(i), qtidal(i), rtidal(i), stidal(i)
+     & "tidal parameters alpha, Q', radius (km) and spin period (d)"
+         read(*,*) mass(i), atidal(i), qtidal(i), rtidal(i), spinperiod
          rtidal(i) = rtidal(i)/au
+         if (spinperiod.gt.0d0) then
+           stidal(i) = 2d0*PI/(spinperiod/yr)
+         else
+           stidal(i) = 0d0
+         end if
       end do
       if (irflg.eq.1) then
          write(*,*)' give radius of body #',i,' in km'

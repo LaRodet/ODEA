@@ -25,7 +25,7 @@ c...  Inputs
       character*(*) tidalfile
 
 c...  Internals
-      integer j,ierr,i
+      integer j,ierr
 
  123  format(3(1p1e23.16,1x))
 

@@ -16,6 +16,7 @@ DRIFT = $(SWIFT_DIR)/drift
 GETACCH = $(SWIFT_DIR)/getacch
 KICKVH = $(SWIFT_DIR)/kickvh
 STEP =  $(SWIFT_DIR)/step
+TIDAL = $(SWIFT_DIR)/tidal
 ORBEL = $(SWIFT_DIR)/orbel
 UTIL = $(SWIFT_DIR)/util
 CE = $(SWIFT_DIR)/ce
@@ -34,6 +35,7 @@ libswift:
 	$(FOR) $(GETACCH)/*.f
 	$(FOR) $(KICKVH)/*.f
 	$(FOR) $(STEP)/*.f
+	$(FOR) $(TIDAL)/*.f
 	$(FOR) $(ORBEL)/*.f
 	$(FOR) $(UTIL)/*.f
 	ar -rv $(SWIFT_DIR)/libswift.a  *.o
