@@ -14,7 +14,8 @@ c This code generates the input file for ODEA from the input of the orbital elem
 
       real*8   mass(nplmax), mtot, rpl(nplmax), rplsq(nplmax)
       real*8   atidal(nplmax), qtidal(nplmax)
-      real*8   rtidal(nplmax), stidal(nplmax), spinperiod
+      real*8   rtidal(nplmax), spinperiod, spin
+      real*8   stidalx(nplmax), stidaly(nplmax), stidalz(nplmax)
       real*8   mat(nplmax,nplmax), umat(nplmax,nplmax)
       real*8   eta(nplmax), mu(nplmax), vsat, vcen
       real*8   xb(nplmax), yb(nplmax), zb(nplmax)
@@ -90,15 +91,26 @@ c This code generates the input file for ODEA from the input of the orbital elem
       write(*,*)' give number of massive bodies in the system '
       read(*,*) nbod
       do i=1,nbod
-         write(*,*)" give mass of body #",i," in solar masses and ",
+          write(*,*)" give mass of body #",i," in solar masses and ",
      & "tidal parameters alpha, Q', radius (km) and spin period (d)"
-         read(*,*) mass(i), atidal(i), qtidal(i), rtidal(i), spinperiod
-         rtidal(i) = rtidal(i)/au
-         if (spinperiod.gt.0d0) then
-           stidal(i) = 2d0*PI/(spinperiod/yr)
-         else
-           stidal(i) = 0d0
-         end if
+          read(*,*) mass(i), atidal(i), qtidal(i), rtidal(i),
+     &              spinperiod, stidalx(i), stidaly(i), stidalz(i)
+          rtidal(i) = rtidal(i)/au
+          if (spinperiod.gt.0d0) then
+            spin = (stidalx(i)**2 + stidaly(i)**2 + stidalz(i)**2)
+            if (spin.ne.1d0) then
+              write(*,*)"Fatal error: Wrong spin normalization"
+              stop
+            end if
+          spin = 2d0*PI/(spinperiod/yr)
+          stidalx(i) = spin*stidalx(i)
+          stidaly(i) = spin*stidaly(i)
+          stidalz(i) = spin*stidalz(i)
+        else
+          stidalx(i) = 0d0
+          stidaly(i) = 0d0
+          stidalz(i) = 0d0
+        end if
       end do
       if (irflg.eq.1) then
          write(*,*)' give radius of body #',i,' in km'
@@ -203,7 +215,8 @@ c... Build inverse transform matrix jacobi --> barycentric
       write(*,*) ' Name of tidal data file?'
       read(*,'(a)') tidalfile
       call io_dump_tidal(tidalfile, nbod, mass(1:nbod), atidal(1:nbod),
-     &   qtidal(1:nbod), rtidal(1:nbod), stidal(1:nbod))
+     &   qtidal(1:nbod), rtidal(1:nbod),
+     &   stidalx(1:nbod), stidaly(1:nbod), stidalz(1:nbod))
 
       okc = .true.
       write(*,*) ' Input iseed (large and odd):'

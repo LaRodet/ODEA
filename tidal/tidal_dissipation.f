@@ -1,50 +1,34 @@
 c***********************************************************************
 c                           TIDAL_DISSIPATION.F
 c***********************************************************************
-c Given the cartesian position and velocity of an orbit,
-c       compute the osculating orbital elements.
+c Given the cartesian position and velocity of an orbit and the tidal
+c parameter, compute the secular tidal correction.
 c
-c Inputs:
-c    x, y, z    ==> position of object
-c    vx, vy, vz ==> velocity of object
-c    gmsum      ==> G * total mass
-c
-c Outputs:
-c    ialpha     ==> conic section type
-C    a          ==> semi-major axis or pericentric distance if a parabola
-c    e          ==> eccentricity
-C    inc        ==> inclination
-C    capom      ==> longitude of ascending node
-C    omega      ==> argument of perihelion
-C    capm       ==> mean anomaly
-c
-c ALGORITHM: See e.g. p.70 of Fitzpatrick's "Priciples of Cel. Mech."
-c REMARKS:  If the inclination INC is less than TINY, we arbitrarily
-c            choose the longitude of the ascending node LGNODE to be 0.0
-c            (so the ascending node is then along the X axis).
-c           If the  eccentricity E is less than SQRT(TINY),
-c            we arbitrarily choose the argument of perihelion to be 0.
+c ALGORITHM: Correia et al. 2011
 
       subroutine tidal_dissipation(nbod, oloc, mass, eta, mu,
-     &     xj, yj, zj, vxj, vyj, vzj, atidal, qtidal, rtidal, stidal,
-     &     dt)
+     &     xj, yj, zj, vxj, vyj, vzj, atidal, qtidal, rtidal, sx, sy,
+     &     sz, dt)
 
       include '../swift.inc'
 
 c...  Inputs Only:
       real*8 mass(NPLMAX), atidal(NPLMAX), qtidal(NPLMAX)
       real*8 rtidal(NPLMAX)
-      real*8 mu(NPLMAX), eta(NPLMAX), dt, meanmotion
+      real*8 mu(NPLMAX), eta(NPLMAX), dt, mm, mc, mp
       integer oloc(NPLMAX,NPLMAX)
       integer nbod
 
 c...  Inputs and Outputs
       real*8 xj(NPLMAX), yj(NPLMAX), zj(NPLMAX)
       real*8 vxj(NPLMAX), vyj(NPLMAX), vzj(NPLMAX)
-      real*8 stidal(NPLMAX)
+      real*8 sx(NPLMAX), sy(NPLMAX), sz(NPLMAX), s
 
 c...  Internals:
-      real*8 a, e, inc, capom, omega, capm, gm, da, ds
+      real*8 a, e, inc, capom, omega, capm, gm, da, de
+      real*8 dsx, dsy, dsz, dsfact
+      real*8 f1, f2, f3, f4, f5, e2, e4, e6, e8, r
+      real*8 kx, ky, kz, k, ct, ex, ey, ez, es
       integer i, j, n, ialpha, itidal, icomp
       logical tidal
 
@@ -69,15 +53,51 @@ c...  Executable code
           call orbel_xv2el(xj(j), yj(j), zj(j), vxj(j), vyj(j), vzj(j),
      &         gm, ialpha, a, e, inc, capom, omega, capm)
           if (ialpha.eq.-1) then
-            meanmotion = sqrt(gm/(a**3))
-            da = dt*9d0*a*meanmotion/qtidal(itidal)*
-     &         ((rtidal(itidal)/a)**5)*mass(icomp)/mass(itidal)*
-     &         (stidal(itidal)-meanmotion)/meanmotion
-            ds = -9d0/2d0*dt*(meanmotion**2)/(qtidal(itidal)*
-     &         atidal(itidal))*((rtidal(itidal)/a)**3)*mass(icomp)
-     &         /mass(itidal)*(stidal(itidal)-meanmotion)/meanmotion
+            kx = yj(j)*vzj(j) - zj(j)*vyj(j)
+            ky = -xj(j)*vzj(j) + zj(j)*vxj(j)
+            kz = xj(j)*vyj(j) - yj(j)*vxj(j)
+            k = sqrt(kx*kx+ky*ky+kz*kz)
+            s = sqrt(sx(itidal)*sx(itidal) + sy(itidal)*sy(itidal) +
+     &          sz(itidal)*sz(itidal))
+            ct = (kx*sx(itidal) + ky*sy(itidal) + kz*sz(itidal))/(s*k)
+            e2 = e*e
+            e4 = e2*e2
+            e6 = e2*e4
+            e8 = e4*e4
+            ex =e*(cos(capom)*cos(omega)-cos(inc)*sin(capom)*sin(omega))
+            ey =e*(sin(capom)*cos(omega)+cos(inc)*cos(capom)*sin(omega))
+            ez = e*sin(inc)*sin(omega)
+            es = (ex*sx(itidal)+ey*sy(itidal)+ez*sz(itidal))/s
+            f1 = (1d0+3d0*e2+3d0*e4/8d0)/((1d0-e2)**4.5d0)
+            f2 = (1d0+7.5d0*e2+45d0*e4/8d0+5d0*e6/16d0)/((1d0-e2)**6d0)
+            f3 = (1d0+15.5d0*e2+255d0*e4/8d0+185d0*e6/16d0+25d0*e8/64d0)
+     &           /((1d0-e2)**7.5d0)
+            f4 = (1d0+1.5d0*e2+e4/8d0)/((1d0-e2)**5d0)
+            f5 = (1+15d0*e2/4d0+15d0*e4/8d0+5*e6/64d0)/((1-e2)**6.5d0)
+            mm = sqrt(gm/(a**3))
+            r = rtidal(itidal)
+            mc = mass(icomp)
+            mp = mass(itidal)
+            da = dt*9d0*a/qtidal(itidal)* ((r/a)**5)*(mc/mp)*
+     &         (f2*ct*s-mm*f3)
+            de = 81d0/2d0*dt/qtidal(itidal)*((r/a)**5)*(mc/mp)*
+     &         (11d0*f4*ct*s/18d0-mm*f5)*e
+            dsfact = 9d0/2d0*dt*mm/(qtidal(itidal)*atidal(itidal))*
+     &         ((r/a)**3)*(mc**2)/(mp*(mp+mc))
+            dsx =  dsfact*(f4*sqrt(1-e2)*0.5d0*s*(sx(itidal)/s-ct*kx/k)-
+     &             f1*sx(itidal)+f2*mm*kx/k+
+     &             es*(6d0+e2)*s*ex/((4d0*(1-e2)**4.5d0)))
+            dsy =  dsfact*(f4*sqrt(1-e2)*0.5d0*s*(sy(itidal)/s-ct*ky/k)-
+     &             f1*sy(itidal)+f2*mm*ky/k
+     &             +es*(6d0+e2)*s*ey/((4d0*(1-e2)**4.5d0)))
+            dsz =  dsfact*(f4*sqrt(1-e2)*0.5d0*s*(sz(itidal)/s-ct*kz/k)-
+     &             f1*sz(itidal)+f2*mm*kz/k+
+     &             es*(6d0+e2)*s*ez/((4d0*(1-e2)**4.5d0)))
             a = a+da
-            stidal(itidal) = stidal(itidal)+ds
+            e = e+de
+            sx(itidal) = sx(itidal)+dsx
+            sy(itidal) = sy(itidal)+dsy
+            sz(itidal) = sz(itidal)+dsz
             call orbel_el2xv(gm, ialpha, a, e, inc, capom, omega, capm,
      &          xj(j), yj(j), zj(j), vxj(j), vyj(j), vzj(j))
           end if

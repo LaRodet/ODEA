@@ -10,10 +10,10 @@ c    mass          ==>  Masses of bodies
 c    atidal        ==>  Dimensionless moment of inertia
 c    qtidal        ==>  Modified tidal factor
 c    rtidal        ==>  Radius
-c    stidal        ==>  Spin
+c    sx, sy, sz    ==>  Spin components
 
       subroutine io_dump_tidal(tidalfile, nbod, mass, atidal, qtidal,
-     &   rtidal, stidal)
+     &   rtidal, sx, sy, sz)
 
       include '../swift.inc'
       include 'io.inc'
@@ -21,7 +21,7 @@ c    stidal        ==>  Spin
 c...  Inputs
       integer nbod
       real*8 mass(nbod), atidal(nbod), qtidal(nbod)
-      real*8 rtidal(nbod), stidal(nbod)
+      real*8 rtidal(nbod), sx(nbod), sy(nbod), sz(nbod)
       character*(*) tidalfile
 
 c...  Internals
@@ -38,7 +38,7 @@ c...  Executable code
 
       do j=1,nbod
          write(7,123) mass(j), atidal(j), qtidal(j), rtidal(j),
-     &      stidal(j)
+     &      sx(j), sy(j), sz(j)
       enddo
 
       close(unit = 7)

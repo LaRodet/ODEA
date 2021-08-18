@@ -12,9 +12,19 @@ data = np.loadtxt(spinfile)
 spinfile.close()
 
 time = data[:,0]
-spins = data[:,1:]
+spindata= data[:,1:]
 
-nbod = spins.shape[1]
+nt = len(time)
+nbod = int(spindata.shape[1]/3)
+
+spins = np.zeros((nt,nbod))
+for t in range(nt):
+    for j in range(nbod):
+        k = j*3
+        sx = spindata[t, k]
+        sy = spindata[t, k+1]
+        sz = spindata[t, k+2]
+        spins[t, j] = np.sqrt(sx*sx + sy*sy + sz*sz)
 
 nbodspin = np.sum(spins[0]>0)
 

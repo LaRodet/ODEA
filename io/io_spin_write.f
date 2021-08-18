@@ -6,19 +6,19 @@ c
 c Input:
 c    t         ==> Current time
 c    nbod      ==> Number of massive bodies
-c    stidal    ==> spin
+c    sx, sy, sz==> spin components
 c    iu        ==> Unit to write to for massive bodies
 c    fopenstat ==> The status flag for the open statements
 c                    of the output files.
 
-      subroutine io_spin_write(t, nbod, stidal, iu, diro, fopenstat)
+      subroutine io_spin_write(t, nbod, sx, sy, sz, iu, diro, fopenstat)
 
       include '../swift.inc'
       include 'io.inc'
 
 c...  Inputs:
       integer iu, nbod
-      real*8 t, stidal(NPLMAX)
+      real*8 t, sx(NPLMAX), sy(NPLMAX), sz(NPLMAX)
       character*(*) fopenstat, diro
 
 c...  Internals
@@ -46,7 +46,7 @@ c...  Executable code
 
       endif
 
-      write(iu,*) t,stidal(1:nbod)
+      write(iu,*) t,sx(1:nbod),sy(1:nbod),sz(1:nbod)
 
       close(iu)
 
