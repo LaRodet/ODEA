@@ -56,7 +56,7 @@ c... Compute the angular momentum H, and thereby the inclination INC.
 
 c...  Compute longitude of ascending node CAPOM
 c     and the argument of latitude u.
-      fac = sqrt(hx**2 + hy**2)/h
+      fac = (hx**2 + hy**2)/(h**2)
 
       if(fac.lt. TINY ) then
          capom = 0.d0
