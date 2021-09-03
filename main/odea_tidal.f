@@ -23,6 +23,7 @@ c     test particle file ==> tp.in
 
       real*8 mass(NPLMAX), atidal(NPLMAX), qtidal(NPLMAX),rtidal(NPLMAX)
       real*8 stidalx(NPLMAX), stidaly(NPLMAX), stidalz(NPLMAX)
+      real*8 j2tidal(NPLMAX)
       real*8 xj(NPLMAX), yj(NPLMAX), zj(NPLMAX)
       real*8 vxj(NPLMAX), vyj(NPLMAX), vzj(NPLMAX)
 
@@ -80,10 +81,10 @@ c...  Prompt and read name of massive bodies data file
 
 c...  Prompt and read name of tidal data file
       write(*,*) ' '
-      write(*,*) 'Enter name of massive bodies data file: '
+      write(*,*) 'Enter name of tidal data file: '
       read(*,999) tidalfile
       call io_init_tidal(tidalfile, mass, atidal, qtidal, rtidal,
-     & stidalx, stidaly, stidalz)
+     & stidalx, stidaly, stidalz, j2tidal)
 
 c...  Get data for the run and the test particles
       write(*,*) 'Enter name of test particle data file: '
@@ -179,10 +180,10 @@ c...  Initialize discard io routine
       ok = .true.
 
       do while (ok)
-         call step_kdk_odea(i1st, t, nbod, ntp, oloc, oloct, mat, umat,
-     &      matp, umatp, mass, eta, mu, etatp, xj, yj, zj, vxj, vyj,
-     &      vzj, xjt, yjt, zjt, vxjt, vyjt, vzjt, istat, rstat, dt,
-     &      iflgchk)
+         call step_kdk_odea_tidal(i1st, t, nbod, ntp, oloc, oloct, mat,
+     &      umat, matp, umatp, mass, eta, mu, etatp, xj, yj, zj, vxj,
+     &      vyj, vzj, xjt, yjt, zjt, vxjt, vyjt, vzjt, istat, rstat, dt,
+     &      iflgchk, atidal, rtidal, stidalx, stidaly, stidalz, j2tidal)
 
          if (any(qtidal(1:nbod).gt.0.d0)) then
             call tidal_dissipation(nbod, oloc, mass, eta, mu,
@@ -273,7 +274,7 @@ c...     If it is time, do a dump
      &           xj, yj, zj, vxj, vyj, vzj, lclose, iflgchk, rplsq)
             call io_dump_tidal(trim(diro)//'/'//'dump_tidal.dat',
      &           nbod, mass, atidal, qtidal, rtidal,
-     &           stidalx, stidaly, stidalz)
+     &           stidalx, stidaly, stidalz, j2tidal)
             call io_dump_tp_hjs(trim(diro)//'/'//'dump_tp.dat', nbod,
      &         ntp, matp, xjt, yjt, zjt, vxjt, vyjt, vzjt, istat, rstat)
             call io_dump_param(trim(diro)//'/'//'dump_param.dat',
@@ -293,7 +294,7 @@ c...  Do a final dump for possible resumption later
      &     xj, yj, zj, vxj, vyj, vzj, lclose, iflgchk, rplsq)
       call io_dump_tidal(trim(diro)//'/'//'dump_tidal.dat',
      &      nbod, mass, atidal, qtidal, rtidal,
-     &      stidalx, stidaly, stidalz)
+     &      stidalx, stidaly, stidalz, j2tidal)
       call io_dump_tp_hjs(trim(diro)//'/'//'dump_tp.dat',
      &     nbod, ntp, matp,
      &     xjt, yjt, zjt, vxjt, vyjt, vzjt, istat, rstat)

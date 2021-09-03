@@ -15,7 +15,7 @@ c    rtidal        ==>  Radius
 c    sx, sy, sz    ==>  Spin components
 
       subroutine io_init_tidal(tidalfile, mass, atidal, qtidal, rtidal,
-     &   sx, sy, sz)
+     &   sx, sy, sz, j2tidal)
 
       include '../swift.inc'
       include 'io.inc'
@@ -27,6 +27,7 @@ c...  Output
       integer nbod
       real*8 mass(NPLMAX), atidal(NPLMAX), qtidal(NPLMAX)
       real*8 rtidal(NPLMAX), sx(NPLMAX), sy(NPLMAX), sz(NPLMAX)
+      real*8 j2tidal(NPLMAX)
 
 c...  Internal
       integer j,ierr
@@ -57,9 +58,9 @@ c...  Read number of planets
 c... Read information relative to bodies: masses, bary pos & vels.
       do j=1,nbod
           read(7,*) mass(j), atidal(j), qtidal(j), rtidal(j),
-     &       sx(j), sy(j), sz(j)
+     &       sx(j), sy(j), sz(j), j2tidal(j)
           write(*,*) mass(j), atidal(j), qtidal(j), rtidal(j),
-     &       sx(j), sy(j), sz(j)
+     &       sx(j), sy(j), sz(j), j2tidal(j)
       enddo
 
       return

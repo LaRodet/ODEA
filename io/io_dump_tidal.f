@@ -13,14 +13,14 @@ c    rtidal        ==>  Radius
 c    sx, sy, sz    ==>  Spin components
 
       subroutine io_dump_tidal(tidalfile, nbod, mass, atidal, qtidal,
-     &   rtidal, sx, sy, sz)
+     &   rtidal, sx, sy, sz, j2tidal)
 
       include '../swift.inc'
       include 'io.inc'
 
 c...  Inputs
       integer nbod
-      real*8 mass(nbod), atidal(nbod), qtidal(nbod)
+      real*8 mass(nbod), atidal(nbod), qtidal(nbod), j2tidal(nbod)
       real*8 rtidal(nbod), sx(nbod), sy(nbod), sz(nbod)
       character*(*) tidalfile
 
@@ -38,7 +38,7 @@ c...  Executable code
 
       do j=1,nbod
          write(7,123) mass(j), atidal(j), qtidal(j), rtidal(j),
-     &      sx(j), sy(j), sz(j)
+     &      sx(j), sy(j), sz(j), j2tidal(j)
       enddo
 
       close(unit = 7)

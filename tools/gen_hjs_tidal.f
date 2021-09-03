@@ -13,7 +13,7 @@ c This code generates the input file for ODEA from the input of the orbital elem
      &                       yr = 365.25d0                       ! day
 
       real*8   mass(nplmax), mtot, rpl(nplmax), rplsq(nplmax)
-      real*8   atidal(nplmax), qtidal(nplmax)
+      real*8   atidal(nplmax), qtidal(nplmax), j2tidal(nplmax)
       real*8   rtidal(nplmax), spinperiod, spin
       real*8   stidalx(nplmax), stidaly(nplmax), stidalz(nplmax)
       real*8   mat(nplmax,nplmax), umat(nplmax,nplmax)
@@ -92,9 +92,10 @@ c This code generates the input file for ODEA from the input of the orbital elem
       read(*,*) nbod
       do i=1,nbod
           write(*,*)" give mass of body #",i," in solar masses and ",
-     & "tidal parameters alpha, Q', radius (km) and spin period (d)"
+     & "tidal parameters alpha, Q', radius (km), spin period (d), ",
+     & "spin orientation sx sy sz and J2"
           read(*,*) mass(i), atidal(i), qtidal(i), rtidal(i),
-     &              spinperiod, stidalx(i), stidaly(i), stidalz(i)
+     &        spinperiod, stidalx(i), stidaly(i), stidalz(i), j2tidal(i)
           rtidal(i) = rtidal(i)/au
           if (spinperiod.gt.0d0) then
             spin = (stidalx(i)**2 + stidaly(i)**2 + stidalz(i)**2)
@@ -215,8 +216,8 @@ c... Build inverse transform matrix jacobi --> barycentric
       write(*,*) ' Name of tidal data file?'
       read(*,'(a)') tidalfile
       call io_dump_tidal(tidalfile, nbod, mass(1:nbod), atidal(1:nbod),
-     &   qtidal(1:nbod), rtidal(1:nbod),
-     &   stidalx(1:nbod), stidaly(1:nbod), stidalz(1:nbod))
+     &   qtidal(1:nbod), rtidal(1:nbod), stidalx(1:nbod),
+     &   stidaly(1:nbod), stidalz(1:nbod), j2tidal(1:nbod))
 
       okc = .true.
       write(*,*) ' Input iseed (large and odd):'
