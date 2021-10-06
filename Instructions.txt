@@ -231,5 +231,5 @@ k xb yb zb vxb vyb vzb ! Positions and velocities of tp in the barycentric frame
 ---
  Tidal Extension
 ---
-Each time the mass is asked, so are asked the dimensionless moment of inertia alpha, the modified tidal factor, the radius (km), the spin period (d) and the spin direction vector coordinates. This information is stored in tidal.in.
+Each time the mass is asked, so are asked the dimensionless moment of inertia alpha, the modified tidal factor, the radius (km), the spin period (d), the spin direction vector coordinates and the j2. This information is stored in tidal.in.
 

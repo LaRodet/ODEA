@@ -140,7 +140,7 @@ c    eltp.dat      ==> Orbital elements tp
          endif
 
          if (ierr.ne.0) then
-            print*,"Problem opening binary file"
+            if (t.lt.(tstop-dtout)) print*,"Problem opening binary file"
             exit
          end if
 

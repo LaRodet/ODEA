@@ -24,6 +24,7 @@ c...  Inputs and Outputs
 
 c...  Internals:
       real*8 gm, r2, r, j2, rs
+      real*8 sxnew, synew, sznew
       integer i, j, n, ialpha, itidal, icomp
       logical tidal
 
@@ -53,12 +54,17 @@ c...  Executable code
           rs = rs/(s*r)
           j2 = j2tidal(itidal)
 
-          sx(itidal) = sx(itidal) + dt*3d0*gm/(r**3)*j2/atidal(itidal)*
+          sxnew = sx(itidal) + dt*3d0*gm/(r**4)*j2/(atidal(itidal)*s)*
      &          rs*(yj(j)*sz(itidal)-zj(j)*sy(itidal))
-          sy(itidal) = sy(itidal) + dt*3d0*gm/(r**3)*j2/atidal(itidal)*
-     &          rs*(-xj(j)*sz(itidal)-zj(j)*sx(itidal))
-          sz(itidal) = sz(itidal) + dt*3d0*gm/(r**3)*j2/atidal(itidal)*
+          synew = sy(itidal) + dt*3d0*gm/(r**4)*j2/(atidal(itidal)*s)*
+     &          rs*(-xj(j)*sz(itidal)+zj(j)*sx(itidal))
+          sznew = sz(itidal) + dt*3d0*gm/(r**4)*j2/(atidal(itidal)*s)*
      &          rs*(xj(j)*sy(itidal)-yj(j)*sx(itidal))
+
+          sx(itidal) = sxnew
+          sy(itidal) = synew
+          sz(itidal) = sznew
+
         end if
       end do
 
